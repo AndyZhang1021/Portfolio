@@ -168,7 +168,7 @@ const Home = ({ onViewWork, onContact }: { onViewWork: () => void; onContact: ()
   const skills = ["React", "Next.js", "Gatsby", "Vite", "TypeScript", "Tailwind CSS", "Database Management", ".NET"];
   const downloadCV = () => {
     const link = document.createElement("a");
-    link.href = "/cv.pdf";
+    link.href = "/CV.pdf";
     link.download = "Weihao_Zhang_CV.pdf";
 
     document.body.appendChild(link);
