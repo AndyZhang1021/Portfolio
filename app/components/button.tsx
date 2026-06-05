@@ -1,9 +1,5 @@
 
-export const Button = ({
-  children,
-  className = "",
-  onClick,
-}: {
+export const Button = ({ children, className = "", onClick }: {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;

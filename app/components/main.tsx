@@ -12,10 +12,13 @@ import {
   Calendar,
   CodeXml,
   DatabaseSearch,
+  Download,
   ExternalLink,
   FileCodeCorner,
   Mail,
   MapPin,
+  MonitorCheck,
+  Phone,
   School,
   Send,
   UsersRound,
@@ -163,6 +166,15 @@ export function Main() {
 
 const Home = ({ onViewWork, onContact }: { onViewWork: () => void; onContact: () => void }) => {
   const skills = ["React", "Next.js", "Gatsby", "Vite", "TypeScript", "Tailwind CSS", "Database Management", ".NET"];
+  const downloadCV = () => {
+    const link = document.createElement("a");
+    link.href = "/cv.pdf";
+    link.download = "Weihao_Zhang_CV.pdf";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
 
   return (
     <div className="min-h-full w-full flex flex-col justify-center min-w-0 py-4 sm:py-6 lg:py-0">
@@ -192,8 +204,23 @@ const Home = ({ onViewWork, onContact }: { onViewWork: () => void; onContact: ()
               <p className="font-light mt-4">Furthermore, I&apos;m fluent in both English and Mandarin.</p>
             </div>
             <div className="my-8 flex flex-wrap items-center gap-3 sm:my-10 sm:gap-4">
-              <Button onClick={onViewWork}>View My Work</Button>
-              <Button onClick={onContact}>Contact Me</Button>
+              <Button onClick={onViewWork} className="gap-2">
+                <MonitorCheck />
+                View My Work
+              </Button>
+              <Button onClick={onContact} className="gap-2">
+                <Phone />
+                Contact Me
+              </Button>
+              <div className="h-8 w-px bg-gray-300/30" />
+              <button
+                onClick={downloadCV}
+                type="button"
+                className="inline-flex items-center justify-center rounded-full border-2 gap-2 border-sky-300 px-5 py-2 text-sm text-sky-300 transition-all duration-300 hover:bg-sky-300/10 sm:px-8 sm:text-base"
+              >
+                <Download />
+                Download CV
+              </button>
             </div>
           </div>
         </div>
