@@ -3,9 +3,9 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { Mousewheel, Pagination } from 'swiper/modules';
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./button";
-import { Calendar, Code, CodeXml, DatabaseSearch, ExternalLink, FileCodeCorner, Mail, MapPin, Send, UsersRound, Zap } from "lucide-react";
+import { Calendar, Code, CodeXml, DatabaseSearch, ExternalLink, FileCodeCorner, Mail, MapPin, School, Send, UsersRound, Zap } from "lucide-react";
 
 const Box = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -28,30 +28,62 @@ const Heading = ({ index, children, title }: { index: number, children: React.Re
 
   )
 }
+
 export function Main() {
+  const NAV = [
+    { name: "Home", href: "/" },
+    { name: "Projects", href: "/projects" },
+    { name: "Skills", href: "/skills" },
+    { name: "Experience", href: "/experience" },
+    { name: "Contact", href: "/contact" },
+  ]
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [swiper, setSwiper] = useState<any>(null);
 
   return (
-    <Swiper
-      mousewheel
-      direction="vertical"
-      className="h-full"
-      modules={[Mousewheel]}>
-      <SwiperSlide className="h-full">
-        <Home />
-      </SwiperSlide>
-      <SwiperSlide className="h-full">
-        <FeaturedProjects />
-      </SwiperSlide>
-      <SwiperSlide className="h-full">
-        <Skills />
-      </SwiperSlide>
-      <SwiperSlide className="h-full">
-        <Experience />
-      </SwiperSlide>
-      <SwiperSlide className="h-full">
-        <Contact />
-      </SwiperSlide>
-    </Swiper>
+    <div className="flex gap-10 p-4 flex-1 min-h-0">
+      <div className="flex flex-col gap-8 justify-center">
+        {NAV.map((nav: any, i: number) => {
+          const isActived = i === activeIndex;
+          return (
+            <button key={`${nav.name}_${i}`} className={`flex items-start gap-2 transition-all duration-300`} onClick={() => swiper?.slideTo(i)}>
+              <div className={`w-4 h-4 flex items-center justify-center rounded-full ${isActived ? "bg-purple-300/40" : ""} transition-all duration-300`}>
+                <span className={`w-2 h-2 flex items-center justify-center rounded-full ${isActived ? "bg-purple-300/70" : "bg-white/70"} transition-all duration-300`}></span>
+              </div>
+              <div className="text-left leading-5 -mt-1">
+                <p className={`text-xs ${isActived ? "text-purple-300/70" : "text-white/70"} transition-all duration-300`}>0{i + 1}</p>
+                <p className={`text-sm text-white/70 transition-all duration-300`}>{nav.name}</p>
+              </div>
+            </button>
+          )
+        })}
+      </div>
+      <div className="flex-1 min-h-0">
+        <Swiper
+          mousewheel
+          direction="vertical"
+          className="h-full"
+          modules={[Mousewheel]}
+          onSwiper={setSwiper}
+          onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}>
+          <SwiperSlide className="h-full">
+            <Home />
+          </SwiperSlide>
+          <SwiperSlide className="h-full">
+            <FeaturedProjects />
+          </SwiperSlide>
+          <SwiperSlide className="h-full">
+            <Skills />
+          </SwiperSlide>
+          <SwiperSlide className="h-full">
+            <Experience />
+          </SwiperSlide>
+          <SwiperSlide className="h-full">
+            <Contact />
+          </SwiperSlide>
+        </Swiper>
+      </div>
+    </div>
   );
 }
 
@@ -63,12 +95,12 @@ const Home = () => {
         <div className="h-full flex flex-col justify-around">
           <div>
             <p className="text-purple-300">FRONT-END DEVELOPER • PROJECT LEAD</p>
-            <p className="text-6xl font-bold mt-4">Building Modern Web Experiences <span className="text-purple-300">That Deliver Real Business Results</span></p>
+            <p className="text-6xl font-bold mt-4">Building Modern Web Experiences <span className="text-purple-300">That Deliver Real Business Value</span></p>
           </div>
           <div className="w-14 h-0.5 bg-purple-400/60"></div>
           <div>
             <div className="mt-8 text-lg leading-7">
-              <p className="text-2xl font-bold mb-2">Hi, I'm <span className="text-purple-300">Weihao Zhang.</span></p>
+              <p className="text-3xl font-bold mb-2">Hi, I'm <span className="text-purple-300">Weihao Zhang.</span></p>
               <p className="font-light">I'm a Front-End Developer with over 4 years of experience delivering commercial websites and web applications.</p>
               <p className="font-light">I specialise in React, Next.js, Tailwind CSS, and modern JavaScript technologies, helping businesses transform ideas into fast, scalable, and user-focused digital products.</p>
             </div>
@@ -77,6 +109,9 @@ const Home = () => {
               <Button>Contact Me</Button>
             </div>
           </div>
+        </div>
+        <div>
+          <img src="/home-bg.png" className="w-full object-contain scale-125" />
         </div>
         <div className="col-span-2 h-fit mt-auto">
           <div className="flex items-center justify-center gap-4 opacity-80 mb-4">
@@ -87,7 +122,7 @@ const Home = () => {
               </React.Fragment>
             ))}
           </div>
-          <div className="flex items-center gap-2 border rounded-2xl border-gray-500/50">
+          <div className="flex items-center gap-2 border rounded-2xl border-purple-400/20 bg-white/5 backdrop-blur-lg">
             <div className="flex items-center gap-4 p-8 flex-1">
               <Calendar size={50} color="#dab2ff" />
               <div className="leading-5">
@@ -160,11 +195,11 @@ const FeaturedProjects = () => {
 
       <div className="grid grid-cols-4 gap-4">
         {PROJECTS.map((project: any, i: number) => (
-          <div key={`project_${i}`} className="rounded-xl overflow-hidden border border-gray-900 flex flex-col h-120">
+          <div key={`project_${i}`} className="rounded-xl overflow-hidden flex flex-col h-120 hover:-translate-y-5 transition-all duration-300">
             <div className="bg-gray-50 h-50 rounded-t-xl">
               <img src={project.image} className="h-full w-full object-contain" />
             </div>
-            <div className="p-4 bg-gray-950 rounded-b-xl flex flex-col justify-between gap-4 flex-1 h-full">
+            <div className="p-4 rounded-b-xl flex flex-col justify-between gap-4 flex-1 h-full border border-t-0 border-purple-400/20 bg-white/5 backdrop-blur-sm">
               <button
                 title="View site"
                 className="w-full flex justify-between gap-4 hover:underline cursor-pointer"
@@ -222,7 +257,7 @@ const Skills = () => {
       </Heading>
       <div className="grid grid-cols-4 gap-6">
         {SKILLS.map((skill: any, i: number) => (
-          <div key={`skill_${i}`} className="flex flex-col gap-4 rounded-xl border border-gray-900 bg-gray-950 p-8">
+          <div key={`skill_${i}`} className="flex flex-col gap-4 rounded-xl border border-purple-400/20 bg-white/5 backdrop-blur-sm p-8 hover:-translate-y-5 transition-all duration-300">
             {skill.icon}
             <p className="text-2xl">{skill.name}</p>
             <div className="flex flex-wrap gap-3">
@@ -239,31 +274,152 @@ const Skills = () => {
   )
 }
 const Experience = () => {
+  const EXPERIENCES = [
+    {
+      date: "2021 - Present",
+      title: "Front-End Developer",
+      company: "Vmor Technology",
+      location: "Sydney CBD",
+      description: [
+        "Developed and maintained a commerical websites and web applications for clients across different industries.",
+        "Collaborated with stakeholders to understand business requirements, propse technical solutiosn and deliver high-quality products.",
+        "Managed project timelines, coordinated development tasks and ensure projects were delviered successfully and on schedule.",
+      ],
+    },
+    {
+      date: "2018 - 2019",
+      title: "Web Developer Intern",
+      company: "ITCiti",
+      location: "Sydney CBD",
+      description: [
+        "Worked on website development projects using WordPress, PHP, HTML, CSS and JavaScript.",
+        "Assisted in website deployment and maintenance, database integration and provided IT supports for business clients",
+      ],
+    }
+  ]
+
+  const EDUCATION = [
+    {
+      date: "2017 - 2019",
+      uni: "Macquarie University",
+      degree: "Bachelor of Digital Business",
+      imgUrl: "/mq.png",
+    },
+    {
+      date: "2020 - 2022",
+      uni: "University of Technology Sydney",
+      degree: "Master of Information Technology",
+      imgUrl: "/uts.png",
+    },
+  ]
+
   return (
-    <div></div>
+    <div className="h-full flex flex-col gap-10 justify-center">
+      <Heading index={3} title="Experiences">
+        A journey of continuous building solutions and delivering value to businesses.
+      </Heading>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="col-span-2">
+          {EXPERIENCES.map((experience, i) => (
+            <div key={`experience_${i}`} className="flex gap-12">
+              {/* Timeline */}
+              <div className="w-45 shrink-0 flex flex-col">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center bg-purple-400/20 rounded-full w-5 h-5">
+                    <div className="h-3 w-3 rounded-full bg-purple-400/50" />
+                  </div>
+                  <p className="text-gray-300 font-medium">{experience.date}</p>
+                </div>
+                {i < EXPERIENCES.length - 1 && <div className="flex-1 h-full w-px bg-purple-400/50 ml-2.25"></div>}
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 border-l border-purple-400/20 pl-8 pb-6">
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-2xl font-semibold text-white">{experience.title}</h3>
+
+                  <div className="flex items-center gap-2 text-purple-200">
+                    <MapPin size={16} />
+                    <p className="text-sm">
+                      {experience.company} · {experience.location}
+                    </p>
+                  </div>
+
+                  <div className="mt-3 space-y-2">
+                    {experience.description.map((description: string, index: number) => (
+                      <div key={`description_${index}`} className="flex gap-3 text-gray-300 leading-7">
+                        <span className="mt-2 h-1.5 w-1.5 rounded-full bg-purple-400 shrink-0" />
+                        <p>{description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <School size={25} color="#dab2ff" />
+            <p className="text-xl uppercase font-bold">EDUCATION</p>
+          </div>
+          {EDUCATION.map((education, i) => (
+            <div key={`education_${i}`}
+              className="rounded-2xl border border-purple-400/20 bg-white/5 backdrop-blur-sm p-5 hover:-translate-y-5 transition-all duration-300">
+              <div className="flex justify-between">
+                <div>
+                  <img src={education.imgUrl} className="h-14 w-14 rounded-lg object-contain" />
+                  <p className="mt-1 text-gray-300 text-sm">{education.uni}</p>
+                </div>
+                <p className="text-sm text-purple-300">{education.date}</p>
+              </div>
+              <p className="font-semibold text-lg mt-2">{education.degree}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
 const Contact = () => {
+  const email = "weihaozhangdev@gmail.com"
   return (
     <div className="h-full flex flex-col gap-10 justify-center">
       <Heading index={4} title="Get In Touch">Let's Build Something Great Together</Heading>
       <div className="grid grid-cols-2 gap-8">
-        <div>
-          <p>I'm always open to discussing new opportunities, interesting projects and collaborations.</p>
-          <div className="flex flex-col gap-4 my-8">
-            <div className="flex items-center gap-4">
-              <Mail size={25} color="#dab2ff" />
-              <p>weihaozhangdev@gmail.com</p>
+        <img src="/contact-bg.png" className="w-full object-contain" />
+        <div className="flex flex-col justify-center">
+          <div>
+            <p className="text-5xl">Having a project in mind?</p>
+            <p className="mt-2">I'm always open to discussing new opportunities, interesting projects and collaborations.</p>
+            <div className="flex flex-col gap-4 my-8">
+              <div className="flex items-center gap-4">
+                <Mail size={25} color="#dab2ff" />
+                <div className="leading-5">
+                  <p className="opacity-80">Email</p>
+                  <p>{email}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <MapPin size={25} color="#dab2ff" />
+                <div className="leading-5">
+                  <p className="opacity-80">Location</p>
+                  <p>Sydney, Australia</p>
+                </div>
+              </div>
+              {/* <div className="flex items-center gap-4">
+                <p className="text-xl font-mono text-[#dab2ff]">in</p>
+                <div className="leading-5">
+                  <p className="opacity-80">LinkedIn</p>
+                  <p>https://au.linkedin.com/in/weihao-zhang-15b6962b5</p>
+                </div>
+              </div> */}
             </div>
-            <div className="flex items-center gap-4">
-              <MapPin size={25} color="#dab2ff" />
-              <p>Sydney, Australia</p>
-            </div>
+            <Button className="flex items-center gap-2" onClick={() => window.location.href = email}>
+              <p>Mail Me</p>
+              <Send size={25} color="#dab2ff" />
+            </Button>
           </div>
-          <Button className="flex items-center gap-2" onClick={() => { }}>
-            <p>Mail Me</p>
-            <Send size={25} color="#dab2ff" />
-          </Button>
         </div>
       </div>
     </div>
