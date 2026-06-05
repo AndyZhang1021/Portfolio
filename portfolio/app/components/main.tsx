@@ -1,84 +1,158 @@
 "use client";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import { Mousewheel, Pagination } from 'swiper/modules';
-import React, { useState } from "react";
+
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
+import type { Swiper as SwiperInstance } from "swiper";
+import { Mousewheel } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
 import { Button } from "./button";
-import { Calendar, Code, CodeXml, DatabaseSearch, ExternalLink, FileCodeCorner, Mail, MapPin, School, Send, UsersRound, Zap } from "lucide-react";
+import {
+  Calendar,
+  CodeXml,
+  DatabaseSearch,
+  ExternalLink,
+  FileCodeCorner,
+  Mail,
+  MapPin,
+  School,
+  Send,
+  UsersRound,
+  Zap,
+} from "lucide-react";
 
-const Box = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className="flex-1 flex flex-col justify-center">
-      <div>{children}</div>
-    </div>
-  )
-}
+type SlideDirection = "horizontal" | "vertical";
 
-const Heading = ({ index, children, title }: { index: number, children: React.ReactNode, title?: string }) => {
+type NavItem = {
+  name: string;
+  href: string;
+};
+
+type Project = {
+  name: string;
+  title: string;
+  description: string;
+  techStack: string[];
+  link: string;
+  image: string;
+  imageWidth: number;
+  imageHeight: number;
+};
+
+type SkillGroup = {
+  name: string;
+  icon: React.ReactNode;
+  skillTechs: string[];
+};
+
+const NAV: NavItem[] = [
+  { name: "Home", href: "/" },
+  { name: "Projects", href: "/projects" },
+  { name: "Skills", href: "/skills" },
+  { name: "Experience", href: "/experience" },
+  { name: "Contact", href: "/contact" },
+];
+
+const SLIDE_CLASS = "h-full w-full min-w-0 overflow-y-auto overflow-x-hidden px-0.5 py-1 lg:py-0";
+const SECTION_CLASS =
+  "min-h-full w-full min-w-0 py-4 sm:py-6 lg:py-0 flex flex-col gap-6 lg:gap-10 justify-start lg:justify-center";
+const CHIP_CLASS = "rounded-full border border-gray-500/80 px-3 py-1 text-xs sm:text-sm";
+const CARD_CLASS = "rounded-lg border border-purple-400/20 bg-white/5 backdrop-blur-sm";
+
+const Heading = ({
+  index,
+  children,
+  title,
+}: {
+  index: number;
+  children: React.ReactNode;
+  title?: string;
+}) => {
   return (
-    <div>
-      <div className="flex items-end gap-4">
-        <p className="text-purple-300/70">0{index}</p>
-        <p className="text-3xl text-white uppercase font-bold">{title}</p>
+    <div className="shrink-0">
+      <div className="flex items-end gap-3 sm:gap-4">
+        <p className="text-sm text-purple-300/70 sm:text-base">0{index}</p>
+        <p className="text-2xl font-bold uppercase text-white sm:text-3xl">{title}</p>
       </div>
-      <p className="font-light mt-1">{children}</p>
-      <div className="w-25 h-0.5 bg-purple-400/60 mt-4"></div>
+      <p className="mt-1 text-sm font-light leading-6 sm:text-base">{children}</p>
+      <div className="mt-4 h-0.5 w-16 bg-purple-400/60 sm:w-24"></div>
     </div>
-
-  )
-}
+  );
+};
 
 export function Main() {
-  const NAV = [
-    { name: "Home", href: "/" },
-    { name: "Projects", href: "/projects" },
-    { name: "Skills", href: "/skills" },
-    { name: "Experience", href: "/experience" },
-    { name: "Contact", href: "/contact" },
-  ]
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [swiper, setSwiper] = useState<any>(null);
+  const [swiper, setSwiper] = useState<SwiperInstance | null>(null);
+  const [swiperDirection, setSwiperDirection] = useState<SlideDirection>("vertical");
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const updateDirection = () => {
+      setSwiperDirection(mediaQuery.matches ? "vertical" : "horizontal");
+    };
+
+    updateDirection();
+    mediaQuery.addEventListener("change", updateDirection);
+
+    return () => mediaQuery.removeEventListener("change", updateDirection);
+  }, []);
+
+  useEffect(() => {
+    swiper?.changeDirection(swiperDirection, true);
+  }, [swiper, swiperDirection]);
+
+  const slideTo = (index: number) => swiper?.slideTo(index);
 
   return (
-    <div className="flex gap-10 p-4 flex-1 min-h-0">
-      <div className="flex flex-col gap-8 justify-center">
-        {NAV.map((nav: any, i: number) => {
-          const isActived = i === activeIndex;
-          return (
-            <button key={`${nav.name}_${i}`} className={`flex items-start gap-2 transition-all duration-300`} onClick={() => swiper?.slideTo(i)}>
-              <div className={`w-4 h-4 flex items-center justify-center rounded-full ${isActived ? "bg-purple-300/40" : ""} transition-all duration-300`}>
-                <span className={`w-2 h-2 flex items-center justify-center rounded-full ${isActived ? "bg-purple-300/70" : "bg-white/70"} transition-all duration-300`}></span>
-              </div>
-              <div className="text-left leading-5 -mt-1">
-                <p className={`text-xs ${isActived ? "text-purple-300/70" : "text-white/70"} transition-all duration-300`}>0{i + 1}</p>
-                <p className={`text-sm text-white/70 transition-all duration-300`}>{nav.name}</p>
-              </div>
-            </button>
-          )
-        })}
-      </div>
-      <div className="flex-1 min-h-0">
+    <div className="flex h-dvh w-full min-w-0 flex-col gap-4 overflow-hidden bg-[linear-gradient(135deg,#050506_0%,#0e1018_28%,#171127_54%,#102527_78%,#07070a_100%)] p-3 sm:p-4 lg:h-screen lg:flex-row lg:gap-8 lg:p-6 xl:gap-10">
+      <nav className="shrink-0 lg:flex lg:w-36 lg:items-center xl:w-40" aria-label="Portfolio sections">
+        <div className="flex w-full max-w-[23rem] justify-between gap-1 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:max-w-none sm:justify-start sm:gap-2 lg:flex-col lg:gap-8 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden">
+          {NAV.map((nav, i) => {
+            const isActive = i === activeIndex;
+            return (
+              <button
+                key={`${nav.name}_${i}`}
+                className={`flex w-16 shrink-0 flex-col items-center gap-1 rounded-full px-1 py-2 text-center transition-all duration-300 sm:w-auto sm:min-w-max sm:flex-row sm:gap-2 sm:px-3 sm:text-left lg:min-w-0 lg:items-start lg:rounded-none lg:p-0 ${isActive ? "bg-white/10 lg:bg-transparent" : "hover:bg-white/5 lg:hover:bg-transparent"
+                  }`}
+                onClick={() => slideTo(i)}
+                type="button">
+                <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${isActive ? "bg-purple-300/40" : ""}`}>
+                  <span className={`flex h-2 w-2 items-center justify-center rounded-full transition-all duration-300 ${isActive ? "bg-purple-300/70" : "bg-white/70"}`}></span>
+                </div>
+                <div className="leading-4 sm:leading-5 lg:-mt-1">
+                  <p className={`text-[11px] transition-all duration-300 sm:text-xs ${isActive ? "text-purple-300/70" : "text-white/70"}`}>
+                    0{i + 1}
+                  </p>
+                  <p className="text-[11px] text-white/70 transition-all duration-300 sm:text-sm">{nav.name}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+      <div className="min-h-0 flex-1">
         <Swiper
-          mousewheel
-          direction="vertical"
-          className="h-full"
+          mousewheel={{ forceToAxis: true, releaseOnEdges: true }}
+          direction={swiperDirection}
+          className="h-full w-full"
           modules={[Mousewheel]}
           onSwiper={setSwiper}
-          onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}>
-          <SwiperSlide className="h-full">
-            <Home />
+          onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+        >
+          <SwiperSlide className={SLIDE_CLASS}>
+            <Home onViewWork={() => slideTo(1)} onContact={() => slideTo(4)} />
           </SwiperSlide>
-          <SwiperSlide className="h-full">
+          <SwiperSlide className={SLIDE_CLASS}>
             <FeaturedProjects />
           </SwiperSlide>
-          <SwiperSlide className="h-full">
+          <SwiperSlide className={SLIDE_CLASS}>
             <Skills />
           </SwiperSlide>
-          <SwiperSlide className="h-full">
+          <SwiperSlide className={SLIDE_CLASS}>
             <Experience />
           </SwiperSlide>
-          <SwiperSlide className="h-full">
+          <SwiperSlide className={SLIDE_CLASS}>
             <Contact />
           </SwiperSlide>
         </Swiper>
@@ -87,135 +161,177 @@ export function Main() {
   );
 }
 
-const Home = () => {
-  const SKILLS = ["React", "Next.js", "Gatsby", "Vite", "Typescript", "Tailwind CSS", "Databse Management", ".NET"]
+const Home = ({ onViewWork, onContact }: { onViewWork: () => void; onContact: () => void }) => {
+  const skills = ["React", "Next.js", "Gatsby", "Vite", "TypeScript", "Tailwind CSS", "Database Management", ".NET"];
+
   return (
-    <div className="h-full">
-      <div className="grid grid-cols-2 h-full">
-        <div className="h-full flex flex-col justify-around">
+    <div className="min-h-full w-full flex flex-col justify-center min-w-0 py-4 sm:py-6 lg:py-0">
+      <div className="grid min-h-full w-full min-w-0 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(260px,0.95fr)] lg:gap-8">
+        <div className="flex min-h-0 w-full max-w-[23rem] min-w-0 flex-col justify-center gap-6 sm:max-w-none lg:justify-around lg:gap-8">
           <div>
-            <p className="text-purple-300">FRONT-END DEVELOPER • PROJECT LEAD</p>
-            <p className="text-6xl font-bold mt-4">Building Modern Web Experiences <span className="text-purple-300">That Deliver Real Business Value</span></p>
+            <p className="text-sm text-purple-300 sm:text-base">FRONT-END DEVELOPER • PROJECT LEAD</p>
+            <p className="mt-4 text-4xl font-bold leading-tight sm:text-5xl 2xl:text-6xl">
+              Building Modern Web Experiences{" "}
+              <span className="text-purple-300">That Deliver Real Business Value</span>
+            </p>
           </div>
-          <div className="w-14 h-0.5 bg-purple-400/60"></div>
+          <div className="h-0.5 w-14 bg-purple-400/60"></div>
           <div>
-            <div className="mt-8 text-lg leading-7">
-              <p className="text-3xl font-bold mb-2">Hi, I'm <span className="text-purple-300">Weihao Zhang.</span></p>
-              <p className="font-light">I'm a Front-End Developer with over 4 years of experience delivering commercial websites and web applications.</p>
-              <p className="font-light">I specialise in React, Next.js, Tailwind CSS, and modern JavaScript technologies, helping businesses transform ideas into fast, scalable, and user-focused digital products.</p>
+            <div className="text-base leading-7 sm:text-lg">
+              <p className="mb-2 text-2xl font-bold sm:text-3xl">
+                Hi, I&apos;m <span className="text-purple-300">Weihao Zhang.</span>
+              </p>
+              <p className="font-light">
+                I&apos;m a Front-End Developer with over 4 years of experience delivering commercial websites and web
+                applications.
+              </p>
+              <p className="font-light">
+                I specialise in React, Next.js, Tailwind CSS, and modern JavaScript technologies, helping businesses
+                transform ideas into fast, scalable, and user-focused digital products.
+              </p>
+              <p className="font-light mt-4">Furthermore, I&apos;m fluent in both English and Mandarin.</p>
             </div>
-            <div className="flex items-center gap-4 my-10">
-              <Button>View My Work</Button>
-              <Button>Contact Me</Button>
+            <div className="my-8 flex flex-wrap items-center gap-3 sm:my-10 sm:gap-4">
+              <Button onClick={onViewWork}>View My Work</Button>
+              <Button onClick={onContact}>Contact Me</Button>
             </div>
           </div>
         </div>
-        <div>
-          <img src="/home-bg.png" className="w-full object-contain scale-125" />
+        <div className="flex min-h-0 min-w-0 items-center justify-center">
+          <Image
+            src="/home-bg.png"
+            alt="Weihao Zhang portfolio hero visual"
+            width={1536}
+            height={1024}
+            priority
+            className="max-h-64 w-full object-contain sm:max-h-80 lg:max-h-none lg:scale-105 2xl:scale-125"
+            sizes="(max-width: 1024px) 100vw, 45vw"
+          />
         </div>
-        <div className="col-span-2 h-fit mt-auto">
-          <div className="flex items-center justify-center gap-4 opacity-80 mb-4">
-            {SKILLS.map((skill: string, i: number) => (
+        <div className="h-fit lg:col-span-2 lg:mt-auto">
+          <div className="mb-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs opacity-80 sm:text-sm lg:text-base">
+            {skills.map((skill, i) => (
               <React.Fragment key={`skill_${i}`}>
                 <p>{skill}</p>
-                {SKILLS[i + 1] && <p>•</p>}
+                {skills[i + 1] && <p className="text-purple-300/70">•</p>}
               </React.Fragment>
             ))}
           </div>
-          <div className="flex items-center gap-2 border rounded-2xl border-purple-400/20 bg-white/5 backdrop-blur-lg">
-            <div className="flex items-center gap-4 p-8 flex-1">
-              <Calendar size={50} color="#dab2ff" />
-              <div className="leading-5">
-                <p className="text-4xl">4+</p>
-                <p className="text-lg font-light">Years Experience</p>
-              </div>
-            </div>
-            <div className="h-10 w-px bg-gray-500/80"></div>
-            <div className="flex items-center gap-4 p-8 flex-1">
-              <CodeXml size={50} color="#dab2ff" />
-              <div className="leading-5">
-                <p className="text-4xl">10+</p>
-                <p className="text-lg font-light">Commerical Projects</p>
-              </div>
-            </div>
-            <div className="h-10 w-px bg-gray-500/80"></div>
-            <div className="flex items-center gap-4 p-8 flex-1">
-              <MapPin size={50} color="#dab2ff" />
-              <div className="leading-5">
-                <p className="text-4xl">Sydney</p>
-                <p className="text-lg font-light">Australia</p>
-              </div>
-            </div>
+          <div className={`${CARD_CLASS} grid grid-cols-1 gap-0 overflow-hidden sm:grid-cols-3`}>
+            <StatItem icon={<Calendar className="h-10 w-10 text-purple-300 lg:h-12 lg:w-12" />} value="4+" label="Years Experience" />
+            <StatItem
+              icon={<CodeXml className="h-10 w-10 text-purple-300 lg:h-12 lg:w-12" />}
+              value="10+"
+              label="Commercial Projects"
+            />
+            <StatItem icon={<MapPin className="h-10 w-10 text-purple-300 lg:h-12 lg:w-12" />} value="Sydney" label="Australia" />
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
+const StatItem = ({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) => {
+  return (
+    <div className="flex items-center gap-4 border-b border-purple-400/20 p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0 lg:p-8">
+      {icon}
+      <div className="leading-5">
+        <p className="text-3xl sm:text-4xl">{value}</p>
+        <p className="text-base font-light sm:text-lg">{label}</p>
+      </div>
+    </div>
+  );
+};
+
 const FeaturedProjects = () => {
-  const PROJECTS = [
+  const projects: Project[] = [
     {
       name: "CMASA",
-      title: "Commerical Site",
-      description: "Offical website of The Chinese Medicine and Acupuncture Society of Australia",
+      title: "Commercial Site",
+      description: "Official website of The Chinese Medicine and Acupuncture Society of Australia",
       techStack: ["Gatsby", "Tailwind CSS", "TypeScript", "Material UI", "Responsive Design", "Swiper"],
       link: "https://cmasa.org.au",
       image: "/cmasa.png",
+      imageWidth: 1903,
+      imageHeight: 929,
     },
     {
       name: "Healthnex",
-      title: "Commerical Site / Management System",
-      description: "A modern healthcare platform intergrated with different web portals focused on smooth collaboration among clinic members while maintaining data privacy with ease.",
+      title: "Commercial Site / Management System",
+      description:
+        "A modern healthcare platform integrated with different web portals focused on smooth collaboration among clinic members while maintaining data privacy with ease.",
       techStack: ["Gatsby", "Next.js", "Tailwind CSS", "TypeScript", "Material UI", ".NET", "Database"],
       link: "https://healthnex.com.au",
       image: "/healthnex.png",
+      imageWidth: 1920,
+      imageHeight: 929,
     },
     {
       name: "CartSniper",
       title: "Web Application",
-      description: "A personal-use online price comparison tool for coles / woolis products.",
+      description: "A personal-use online price comparison tool for Coles and Woolworths products.",
       techStack: ["Gatsby", "Tailwind CSS", "Mobile-First Design", "RapidApi"],
       link: "https://wz-cart-sniper.vercel.app/",
       image: "/cart-sniper.png",
+      imageWidth: 1402,
+      imageHeight: 1122,
     },
     {
       name: "Aestate",
       title: "Management System",
-      description: "A modern management system for agent to publish property ads, and generate promotion ad video using AI.",
+      description: "A modern management system for agents to publish property ads and generate promotion videos using AI.",
       techStack: ["Gatsby", "Claude AI", "Tailwind CSS", "TypeScript", "Material UI", ".NET", "Database"],
       link: "",
       image: "/aestate.png",
-    }
-  ]
+      imageWidth: 1920,
+      imageHeight: 929,
+    },
+  ];
+
   return (
-    <div className="h-full flex flex-col gap-10 justify-center">
+    <div className={SECTION_CLASS}>
       <Heading index={1} title="Featured Projects">
-        A selection of commerical websites and applications I've helped designed, develop and deliver for clients across different industries.
+        A selection of commercial websites and applications I&apos;ve helped design, develop and deliver for clients
+        across different industries.
       </Heading>
 
-      <div className="grid grid-cols-4 gap-4">
-        {PROJECTS.map((project: any, i: number) => (
-          <div key={`project_${i}`} className="rounded-xl overflow-hidden flex flex-col h-120 hover:-translate-y-5 transition-all duration-300">
-            <div className="bg-gray-50 h-50 rounded-t-xl">
-              <img src={project.image} className="h-full w-full object-contain" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {projects.map((project, i) => (
+          <div
+            key={`project_${i}`}
+            className="flex h-full min-h-[24rem] flex-col overflow-hidden rounded-lg transition-all duration-300 md:hover:-translate-y-3"
+          >
+            <div className="flex h-44 items-center justify-center rounded-t-lg bg-gray-50 p-3 sm:h-48 lg:h-50">
+              <Image
+                src={project.image}
+                alt={`${project.name} project screenshot`}
+                width={project.imageWidth}
+                height={project.imageHeight}
+                className="h-full w-full object-contain"
+                sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
+              />
             </div>
-            <div className="p-4 rounded-b-xl flex flex-col justify-between gap-4 flex-1 h-full border border-t-0 border-purple-400/20 bg-white/5 backdrop-blur-sm">
+            <div className={`${CARD_CLASS} flex flex-1 flex-col justify-between gap-4 rounded-t-none border-t-0 p-4`}>
               <button
-                title="View site"
-                className="w-full flex justify-between gap-4 hover:underline cursor-pointer"
-                onClick={() => window.open(project.link)}>
+                title={project.link ? "View site" : "Private project"}
+                className="flex w-full cursor-pointer justify-between gap-4 hover:underline disabled:cursor-default disabled:hover:no-underline"
+                onClick={() => project.link && window.open(project.link, "_blank", "noopener,noreferrer")}
+                type="button"
+                disabled={!project.link}
+              >
                 <div className="text-left">
-                  <p className="text-2xl">{project.name}</p>
-                  <p className="text-purple-400">{project.title}</p>
+                  <p className="text-xl sm:text-2xl">{project.name}</p>
+                  <p className="text-sm text-purple-400 sm:text-base">{project.title}</p>
                 </div>
-                <ExternalLink size={25} color="#dab2ff" />
+                {project.link && <ExternalLink className="h-6 w-6 shrink-0 text-purple-300" />}
               </button>
-              <div className="text-sm opacity-80 leading-6">
+              <div className="text-sm leading-6 opacity-80">
                 <p>{project.description}</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {project.techStack.map((techStack: string, i: number) => (
-                  <div className="rounded-2xl px-3 py-1 text-sm border border-gray-500/80" key={`techStack_${i}`}>
+                {project.techStack.map((techStack, i) => (
+                  <div className={CHIP_CLASS} key={`techStack_${i}`}>
                     {techStack}
                   </div>
                 ))}
@@ -225,44 +341,49 @@ const FeaturedProjects = () => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
+
 const Skills = () => {
-  const SKILLS = [
+  const skills: SkillGroup[] = [
     {
       name: "Front-End Development",
-      icon: <FileCodeCorner size={60} color="#dab2ff" />,
+      icon: <FileCodeCorner className="h-11 w-11 text-purple-300 sm:h-12 sm:w-12 lg:h-14 lg:w-14" />,
       skillTechs: ["React", "React Native", "Next.js", "Gatsby", "Vite", "Tailwind CSS", "TypeScript", "Material UI", "Zustand"],
     },
     {
       name: "Back-End Development",
-      icon: <DatabaseSearch size={60} color="#dab2ff" />,
+      icon: <DatabaseSearch className="h-11 w-11 text-purple-300 sm:h-12 sm:w-12 lg:h-14 lg:w-14" />,
       skillTechs: [".NET", "ASP.NET Core", "C#", "SQL", "Database Management"],
     },
     {
       name: "Professional Skills",
-      icon: <UsersRound size={60} color="#dab2ff" />,
-      skillTechs: ["Leadership", "Project Management", "Client Communication", "Requirment Analysis", "Problem Solving", "Team Collaboration"],
+      icon: <UsersRound className="h-11 w-11 text-purple-300 sm:h-12 sm:w-12 lg:h-14 lg:w-14" />,
+      skillTechs: ["Leadership", "Project Management", "Client Communication", "Requirement Analysis", "Problem Solving", "Team Collaboration"],
     },
     {
       name: "AI & Tools",
-      icon: <Zap size={60} color="#dab2ff" />,
+      icon: <Zap className="h-11 w-11 text-purple-300 sm:h-12 sm:w-12 lg:h-14 lg:w-14" />,
       skillTechs: ["ChatGPT", "Claude", "Gemini", "Git", "VS Code", "Agile Workflow"],
     },
-  ]
+  ];
+
   return (
-    <div className="h-full flex flex-col gap-10 justify-center">
+    <div className={SECTION_CLASS}>
       <Heading index={2} title="Skills">
         Technologies and skills I use to build scalable, user-focused, and high-performance applications.
       </Heading>
-      <div className="grid grid-cols-4 gap-6">
-        {SKILLS.map((skill: any, i: number) => (
-          <div key={`skill_${i}`} className="flex flex-col gap-4 rounded-xl border border-purple-400/20 bg-white/5 backdrop-blur-sm p-8 hover:-translate-y-5 transition-all duration-300">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6 xl:grid-cols-4">
+        {skills.map((skill, i) => (
+          <div
+            key={`skill_${i}`}
+            className={`${CARD_CLASS} flex flex-col gap-4 p-5 transition-all duration-300 md:hover:-translate-y-3 sm:p-6 lg:p-8`}
+          >
             {skill.icon}
-            <p className="text-2xl">{skill.name}</p>
-            <div className="flex flex-wrap gap-3">
-              {skill.skillTechs.map((skillTech: string, i: number) => (
-                <div className="rounded-2xl px-3 py-1 text-sm border border-gray-500/80" key={`skillTech_${i}`}>
+            <p className="text-xl sm:text-2xl">{skill.name}</p>
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              {skill.skillTechs.map((skillTech, i) => (
+                <div className={CHIP_CLASS} key={`skillTech_${i}`}>
                   {skillTech}
                 </div>
               ))}
@@ -271,19 +392,20 @@ const Skills = () => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
+
 const Experience = () => {
-  const EXPERIENCES = [
+  const experiences = [
     {
       date: "2021 - Present",
       title: "Front-End Developer",
       company: "Vmor Technology",
       location: "Sydney CBD",
       description: [
-        "Developed and maintained a commerical websites and web applications for clients across different industries.",
-        "Collaborated with stakeholders to understand business requirements, propse technical solutiosn and deliver high-quality products.",
-        "Managed project timelines, coordinated development tasks and ensure projects were delviered successfully and on schedule.",
+        "Developed and maintained commercial websites and web applications for clients across different industries.",
+        "Collaborated with stakeholders to understand business requirements, propose technical solutions and deliver high-quality products.",
+        "Managed project timelines, coordinated development tasks and ensured projects were delivered successfully and on schedule.",
       ],
     },
     {
@@ -293,62 +415,64 @@ const Experience = () => {
       location: "Sydney CBD",
       description: [
         "Worked on website development projects using WordPress, PHP, HTML, CSS and JavaScript.",
-        "Assisted in website deployment and maintenance, database integration and provided IT supports for business clients",
+        "Assisted in website deployment and maintenance, database integration and provided IT support for business clients.",
       ],
-    }
-  ]
+    },
+  ];
 
-  const EDUCATION = [
+  const education = [
     {
       date: "2017 - 2019",
       uni: "Macquarie University",
       degree: "Bachelor of Digital Business",
       imgUrl: "/mq.png",
+      imageWidth: 600,
+      imageHeight: 600,
     },
     {
       date: "2020 - 2022",
       uni: "University of Technology Sydney",
       degree: "Master of Information Technology",
       imgUrl: "/uts.png",
+      imageWidth: 225,
+      imageHeight: 225,
     },
-  ]
+  ];
 
   return (
-    <div className="h-full flex flex-col gap-10 justify-center">
+    <div className={SECTION_CLASS}>
       <Heading index={3} title="Experiences">
         A journey of continuous building solutions and delivering value to businesses.
       </Heading>
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2">
-          {EXPERIENCES.map((experience, i) => (
-            <div key={`experience_${i}`} className="flex gap-12">
-              {/* Timeline */}
-              <div className="w-45 shrink-0 flex flex-col">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          {experiences.map((experience, i) => (
+            <div key={`experience_${i}`} className="grid grid-cols-[6rem_minmax(0,1fr)] gap-4 sm:grid-cols-[10rem_minmax(0,1fr)] lg:gap-8">
+              <div className="flex shrink-0 flex-col">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center bg-purple-400/20 rounded-full w-5 h-5">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-purple-400/20">
                     <div className="h-3 w-3 rounded-full bg-purple-400/50" />
                   </div>
-                  <p className="text-gray-300 font-medium">{experience.date}</p>
+                  <p className="text-xs font-medium text-gray-300 sm:text-sm lg:text-base">{experience.date}</p>
                 </div>
-                {i < EXPERIENCES.length - 1 && <div className="flex-1 h-full w-px bg-purple-400/50 ml-2.25"></div>}
+                {i < experiences.length - 1 && <div className="ml-2.25 h-full w-px flex-1 bg-purple-400/50"></div>}
               </div>
 
-              {/* Content */}
-              <div className="flex-1 border-l border-purple-400/20 pl-8 pb-6">
+              <div className="min-w-0 border-l border-purple-400/20 pb-6 pl-4 sm:pl-6 lg:pl-8">
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-2xl font-semibold text-white">{experience.title}</h3>
+                  <h3 className="text-xl font-semibold text-white sm:text-2xl">{experience.title}</h3>
 
                   <div className="flex items-center gap-2 text-purple-200">
-                    <MapPin size={16} />
+                    <MapPin className="h-4 w-4 shrink-0" />
                     <p className="text-sm">
-                      {experience.company} · {experience.location}
+                      {experience.company} - {experience.location}
                     </p>
                   </div>
 
                   <div className="mt-3 space-y-2">
-                    {experience.description.map((description: string, index: number) => (
-                      <div key={`description_${index}`} className="flex gap-3 text-gray-300 leading-7">
-                        <span className="mt-2 h-1.5 w-1.5 rounded-full bg-purple-400 shrink-0" />
+                    {experience.description.map((description, index) => (
+                      <div key={`description_${index}`} className="flex gap-3 text-sm leading-6 text-gray-300 sm:text-base sm:leading-7">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-purple-400" />
                         <p>{description}</p>
                       </div>
                     ))}
@@ -358,70 +482,89 @@ const Experience = () => {
             </div>
           ))}
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
-            <School size={25} color="#dab2ff" />
-            <p className="text-xl uppercase font-bold">EDUCATION</p>
+            <School className="h-6 w-6 text-purple-300" />
+            <p className="text-lg font-bold uppercase sm:text-xl">Education</p>
           </div>
-          {EDUCATION.map((education, i) => (
-            <div key={`education_${i}`}
-              className="rounded-2xl border border-purple-400/20 bg-white/5 backdrop-blur-sm p-5 hover:-translate-y-5 transition-all duration-300">
-              <div className="flex justify-between">
-                <div>
-                  <img src={education.imgUrl} className="h-14 w-14 rounded-lg object-contain" />
-                  <p className="mt-1 text-gray-300 text-sm">{education.uni}</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            {education.map((item, i) => (
+              <div key={`education_${i}`} className={`${CARD_CLASS} p-5 transition-all duration-300 md:hover:-translate-y-3`}>
+                <div className="flex justify-between gap-4">
+                  <div>
+                    <Image
+                      src={item.imgUrl}
+                      alt={`${item.uni} logo`}
+                      width={item.imageWidth}
+                      height={item.imageHeight}
+                      className="h-14 w-14 rounded-lg object-contain"
+                    />
+                    <p className="mt-1 text-sm text-gray-300">{item.uni}</p>
+                  </div>
+                  <p className="shrink-0 text-sm text-purple-300">{item.date}</p>
                 </div>
-                <p className="text-sm text-purple-300">{education.date}</p>
+                <p className="mt-2 text-base font-semibold sm:text-lg">{item.degree}</p>
               </div>
-              <p className="font-semibold text-lg mt-2">{education.degree}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
+
 const Contact = () => {
-  const email = "weihaozhangdev@gmail.com"
+  const email = "weihaozhangdev@gmail.com";
+
   return (
-    <div className="h-full flex flex-col gap-10 justify-center">
-      <Heading index={4} title="Get In Touch">Let's Build Something Great Together</Heading>
-      <div className="grid grid-cols-2 gap-8">
-        <img src="/contact-bg.png" className="w-full object-contain" />
+    <div className={SECTION_CLASS}>
+      <Heading index={4} title="Get In Touch">
+        Let&apos;s Build Something Great Together
+      </Heading>
+      <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-2 lg:gap-8">
+        <Image
+          src="/contact-bg.png"
+          alt="Contact illustration"
+          width={1536}
+          height={1024}
+          className="max-h-64 w-full object-contain sm:max-h-80 lg:max-h-none"
+          sizes="(max-width: 1024px) 100vw, 50vw"
+        />
         <div className="flex flex-col justify-center">
           <div>
-            <p className="text-5xl">Having a project in mind?</p>
-            <p className="mt-2">I'm always open to discussing new opportunities, interesting projects and collaborations.</p>
-            <div className="flex flex-col gap-4 my-8">
+            <p className="text-3xl leading-tight sm:text-4xl lg:text-5xl">Having a project in mind?</p>
+            <p className="mt-2 text-sm leading-6 sm:text-base">
+              I&apos;m always open to discussing new opportunities, interesting projects and collaborations.
+            </p>
+            <div className="my-8 flex flex-col gap-4">
               <div className="flex items-center gap-4">
-                <Mail size={25} color="#dab2ff" />
-                <div className="leading-5">
+                <Mail className="h-6 w-6 shrink-0 text-purple-300" />
+                <div className="min-w-0 leading-5">
                   <p className="opacity-80">Email</p>
-                  <p>{email}</p>
+                  <p className="break-all sm:break-normal">{email}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <MapPin size={25} color="#dab2ff" />
+                <MapPin className="h-6 w-6 shrink-0 text-purple-300" />
                 <div className="leading-5">
                   <p className="opacity-80">Location</p>
                   <p>Sydney, Australia</p>
                 </div>
               </div>
-              {/* <div className="flex items-center gap-4">
-                <p className="text-xl font-mono text-[#dab2ff]">in</p>
-                <div className="leading-5">
-                  <p className="opacity-80">LinkedIn</p>
-                  <p>https://au.linkedin.com/in/weihao-zhang-15b6962b5</p>
-                </div>
-              </div> */}
             </div>
-            <Button className="flex items-center gap-2" onClick={() => window.location.href = email}>
+            <Button className="gap-2" onClick={() => (window.location.href = `mailto:${email}`)}>
               <p>Mail Me</p>
-              <Send size={25} color="#dab2ff" />
+              <Send className="h-6 w-6 text-purple-300" />
             </Button>
           </div>
         </div>
       </div>
+
+      <center className="text-xs leading-5 opacity-55 mt-8">
+        <p className="text-sm">Copyrighted © 2026 Weihao Zhang</p>
+        <p className="text-center mt-4">This personal portfolio website was fully designed and built by me using Next.js, Lucidchart, and Swiper.js</p>
+        <p>The website was built entirely by hand, with AI-generated images used solely for visual content.</p>
+      </center>
     </div>
-  )
-}
+  );
+};

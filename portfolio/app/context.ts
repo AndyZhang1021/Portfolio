@@ -2,4 +2,4 @@
 
 import { createContext } from "react";
 
-export const MyContext = createContext<any>(null);
+export const MyContext = createContext<Record<string, never> | null>(null);
