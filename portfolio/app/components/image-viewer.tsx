@@ -97,7 +97,7 @@ export const FullScreenImageSwiper = ({ imageList, initIndex = 1, isMini = false
               </Swiper>
               <button ref={nextButtonRef} className={`text-white bg-[#00000096] rounded-md pl-1 py-6 ${+currentIndex < attachments.length ? "can-hover:hover:opacity-75" : "opacity-50"} can-hover:hover:opacity-75`}
                 onClick={() => swipeToImgByIndex(+currentIndex + 1)}>
-                <ChevronRight sx={{ fontSize: isMini ? "1rem" : "3rem" }} />
+                {/* <ChevronRight sx={{ fontSize: isMini ? "1rem" : "3rem" }} /> */}
               </button>
 
             </div>
