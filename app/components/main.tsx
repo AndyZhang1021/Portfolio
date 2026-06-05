@@ -514,7 +514,7 @@ const Experience = () => {
 };
 
 const Contact = () => {
-  const email = "weihaozhangdev@gmail.com";
+  const email = "weihaoaz@gmail.com";
 
   return (
     <div className={SECTION_CLASS}>
